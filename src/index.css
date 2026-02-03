@@ -1,0 +1,32 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+body {
+  /* Ocean Background Image */
+  background-image: url('/src/assets/beach-bg.png');
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  background-repeat: no-repeat;
+
+  min-height: 100vh;
+  font-family: 'Inter', system-ui, sans-serif;
+  color: #1a202c;
+  overflow-x: hidden;
+}
+
+/* Optional: Keyframes for subtle ocean movement effect if desired later */
+@keyframes wave {
+  0% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
+
+  100% {
+    background-position: 0% 50%;
+  }
+}
