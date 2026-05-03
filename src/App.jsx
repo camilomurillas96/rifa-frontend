@@ -176,7 +176,7 @@ function App() {
             {/* Mensaje de la condición del sorteo, ¡clave para la transparencia! */}
             <div className="mt-4 mb-6 text-center bg-yellow-100/80 border-l-4 border-yellow-500 text-yellow-900 p-4 rounded-r-lg shadow">
               <p className="font-bold">🎯 ¡Aviso Importante!</p>
-              <p className="text-sm">El sorteo se jugará con la Lotería de Boyacá una vez se haya vendido el <strong>{SALE_THRESHOLD_PERCENT}%</strong> del total de las boletas. ¡Tu compra nos acerca a la meta!</p>
+              <p className="text-sm">El sorteo se jugará con la Lotería del Valle una vez se haya vendido el <strong>{SALE_THRESHOLD_PERCENT}%</strong> del total de las boletas. ¡Tu compra nos acerca a la meta!</p>
             </div>
             <div className="grid grid-cols-5 sm:grid-cols-10 gap-3 sm:gap-4">
               {tickets.map((ticket) => (
