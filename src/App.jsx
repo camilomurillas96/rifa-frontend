@@ -33,6 +33,9 @@ function App() {
   const { tickets, loading, error, fetchTickets } = useTickets();
   const [selectedNumbers, setSelectedNumbers] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  // Nuevo estado para controlar el flujo de la reserva en el modal
+  const [reservationStatus, setReservationStatus] = useState('idle'); // idle | submitting | success | error
+  const [reservationError, setReservationError] = useState('');
 
   const [formData, setFormData] = useState({
     name: '',
@@ -74,10 +77,29 @@ function App() {
     }
   };
 
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    // Pequeño delay para que la animación de cierre del modal se vea bien
+    setTimeout(() => {
+      // Si la reserva fue exitosa, limpiamos todo y refrescamos los tiquetes
+      if (reservationStatus === 'success') {
+        setSelectedNumbers([]);
+        setFormData({ name: '', phone: '', email: '' });
+        fetchTickets();
+      }
+      // Reseteamos el estado del modal para la proxima vez que se abra
+      setReservationStatus('idle');
+      setReservationError('');
+    }, 300);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (selectedNumbers.length === 0) return;
  
+    setReservationStatus('submitting');
+    setReservationError('');
+
     const payload = {
       numbers: selectedNumbers,
       name: formData.name,
@@ -87,28 +109,23 @@ function App() {
  
     try {
       await axios.post(`${API_URL}/api/tickets/reserve`, payload);
- 
-      // Mensaje de WhatsApp mejorado, más amigable y profesional
-      const message = `¡Hola! 👋 Quiero reservar los tiquetes para el sorteo a San Andrés. Mis números son: *${selectedNumbers.join(', ')}*. Mi nombre es *${formData.name}*. ¡Gracias!`;
-      const whatsappUrl = `https://wa.me/${ADMIN_PHONE}?text=${encodeURIComponent(message)}`;
- 
-      alert(`✅ ¡Tus números han sido pre-reservados! Serás redirigido a WhatsApp para confirmar con el organizador.`);
-      window.open(whatsappUrl, '_blank');
- 
-      setIsModalOpen(false);
-      setSelectedNumbers([]);
-      setFormData({ name: '', phone: '', email: '' });
-      fetchTickets(); // Refrescar los datos inmediatamente
- 
+      setReservationStatus('success');
+      // La lógica de limpieza y cierre del modal ahora está en `handleCloseModal`
+      // para que el usuario pueda ver el mensaje de éxito antes de que todo desaparezca.
     } catch (err) {
       console.error(err);
       const errorMessage = err.response?.data?.message || err.response?.data || "Ocurrió un error al reservar. Intenta de nuevo.";
-      alert(`❌ Error: ${errorMessage}`);
+      setReservationError(errorMessage);
+      setReservationStatus('error');
     }
   };
 
   // Usamos useMemo para evitar recalcular en cada renderizado
   const reservedCount = useMemo(() => tickets.filter(t => t.status !== 'AVAILABLE').length, [tickets]);
+
+  // Calculamos el link de WhatsApp para usarlo en el modal de éxito
+  const whatsappMessage = `¡Hola! Quiero reservar los tiquetes para el sorteo a San Andrés. Mis números son: *${selectedNumbers.join(', ')}*. Mi nombre es *${formData.name}*. ¡Gracias!`;
+  const whatsappUrl = `https://wa.me/${ADMIN_PHONE}?text=${encodeURIComponent(whatsappMessage)}`;
 
   // NOTA: Para el fondo, agrega una imagen de San Andrés a tu carpeta `public`
   // y luego en tu archivo `index.css` (o similar) agrega:
@@ -173,37 +190,74 @@ function App() {
         )}
 
         {isModalOpen && (
-          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50">
-            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-fade-in-up border-2 border-cyan-100">
+          <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 z-50" onClick={handleCloseModal}>
+            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden animate-fade-in-up border-2 border-cyan-100" onClick={(e) => e.stopPropagation()}>
               <div className="bg-gradient-to-r from-cyan-600 to-blue-600 p-5 text-white flex justify-between items-center">
-                <h2 className="text-xl font-bold flex items-center gap-2">🏝️ Finalizar Reserva</h2>
-                <button onClick={() => setIsModalOpen(false)} className="text-white/80 hover:text-white font-bold text-2xl transition-colors">&times;</button>
+                <h2 className="text-xl font-bold flex items-center gap-2">
+                  {reservationStatus === 'success' ? '✅ ¡Paso Final!' : '🏝️ Finalizar Reserva'}
+                </h2>
+                <button onClick={handleCloseModal} className="text-white/80 hover:text-white font-bold text-2xl transition-colors">&times;</button>
               </div>
 
-              <form onSubmit={handleSubmit} className="p-6 space-y-4">
-                <div className="bg-gray-100 p-4 rounded-lg text-center">
-                  <p className="text-sm text-gray-600">Estás a un paso de apartar los números:</p>
-                  <p className="font-bold text-2xl text-blue-800 tracking-wider my-2">{selectedNumbers.join(', ')}</p>
-                  <p className="text-sm text-gray-600">Total de boletas: {selectedNumbers.length}</p>
-                </div>
+              {/* --- Vista del Formulario (Estado Inicial) --- */}
+              {reservationStatus === 'idle' && (
+                <form onSubmit={handleSubmit} className="p-6 space-y-4">
+                  <div className="bg-gray-100 p-4 rounded-lg text-center">
+                    <p className="text-sm text-gray-600">Estás a un paso de apartar los números:</p>
+                    <p className="font-bold text-2xl text-blue-800 tracking-wider my-2">{selectedNumbers.join(', ')}</p>
+                    <p className="text-sm text-gray-600">Total de boletas: {selectedNumbers.length}</p>
+                  </div>
+                  <div>
+                    <label htmlFor="name" className="block text-gray-700 font-bold mb-1">Nombre Completo</label>
+                    <input id="name" type="text" name="name" placeholder="Ej: Juan Pérez" required className="w-full border p-3 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} />
+                  </div>
+                  <div>
+                    <label htmlFor="phone" className="block text-gray-700 font-bold mb-1">Celular (WhatsApp)</label>
+                    <input id="phone" type="tel" name="phone" placeholder="Ej: 3101234567" required className="w-full border p-3 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition" value={formData.phone} onChange={(e) => setFormData({ ...formData, phone: e.target.value })} />
+                  </div>
+                  <div>
+                    <label htmlFor="email" className="block text-gray-700 font-bold mb-1">Email (Opcional)</label>
+                    <input id="email" type="email" name="email" placeholder="Ej: juan.perez@email.com" className="w-full border p-3 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition" value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })} />
+                  </div>
+                  <button type="submit" className="w-full bg-cyan-600 hover:bg-cyan-700 text-white font-bold py-4 rounded-lg shadow-lg transition-transform transform hover:scale-105 text-lg">
+                    Confirmar Reserva
+                  </button>
+                </form>
+              )}
 
-                <div>
-                  <label htmlFor="name" className="block text-gray-700 font-bold mb-1">Nombre Completo</label>
-                  <input id="name" type="text" name="name" placeholder="Ej: Juan Pérez" required className="w-full border p-3 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition" value={formData.name} onChange={(e) => setFormData({ ...formData, name: e.target.value })} />
+              {/* --- Vista de Carga --- */}
+              {reservationStatus === 'submitting' && (
+                <div className="p-12 flex flex-col items-center justify-center space-y-4">
+                  <div className="w-12 h-12 border-4 border-cyan-500 border-t-transparent rounded-full animate-spin"></div>
+                  <p className="text-gray-600 font-medium">Procesando tu reserva...</p>
                 </div>
-                <div>
-                  <label htmlFor="phone" className="block text-gray-700 font-bold mb-1">Celular (WhatsApp)</label>
-                  <input id="phone" type="tel" name="phone" placeholder="Ej: 3101234567" required className="w-full border p-3 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition" value={formData.phone} onChange={(e) => setFormData({ ...formData, phone: e.target.value })} />
-                </div>
-                <div>
-                  <label htmlFor="email" className="block text-gray-700 font-bold mb-1">Email (Opcional)</label>
-                  <input id="email" type="email" name="email" placeholder="Ej: juan.perez@email.com" className="w-full border p-3 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 transition" value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })} />
-                </div>
+              )}
 
-                <button type="submit" className="w-full bg-green-600 hover:bg-green-700 text-white font-bold py-4 rounded-lg shadow-lg transition-transform transform hover:scale-105 text-lg">
-                  Confirmar y Contactar por WhatsApp ✅
-                </button>
-              </form>
+              {/* --- Vista de Éxito --- */}
+              {reservationStatus === 'success' && (
+                <div className="p-6 text-center space-y-4">
+                  <p className="text-gray-800">¡Tus números han sido pre-reservados con éxito!</p>
+                  <div className="bg-gray-100 p-4 rounded-lg">
+                    <p className="font-bold text-2xl text-blue-800 tracking-wider">{selectedNumbers.join(', ')}</p>
+                  </div>
+                  <p className="text-gray-600 text-sm">Para completar, contacta al organizador por WhatsApp para coordinar el pago.</p>
+                  <a href={whatsappUrl} target="_blank" rel="noopener noreferrer" className="w-full inline-block bg-green-600 hover:bg-green-700 text-white font-bold py-4 rounded-lg shadow-lg transition-transform transform hover:scale-105 text-lg">
+                    Contactar por WhatsApp ✅
+                  </a>
+                  <button onClick={handleCloseModal} className="text-sm text-gray-500 hover:text-gray-800 pt-2">Cerrar</button>
+                </div>
+              )}
+
+              {/* --- Vista de Error --- */}
+              {reservationStatus === 'error' && (
+                <div className="p-6 text-center space-y-4">
+                  <h3 className="text-xl font-bold text-red-600">❌ Ocurrió un Error</h3>
+                  <p className="bg-red-100 text-red-800 p-3 rounded-lg">{reservationError}</p>
+                  <button onClick={() => setReservationStatus('idle')} className="w-full bg-cyan-600 hover:bg-cyan-700 text-white font-bold py-3 rounded-lg shadow-lg transition-transform transform hover:scale-105">
+                    Intentar de Nuevo
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         )}
