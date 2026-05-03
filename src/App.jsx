@@ -20,6 +20,22 @@ const PrizeDetails = () => (
   </div>
 );
 
+// --- Componente para Términos y Condiciones ---
+const TermsAndConditions = ({ saleThreshold }) => (
+  <div className="mt-12 w-full max-w-5xl bg-gray-800/50 backdrop-blur-sm p-6 rounded-2xl border border-white/20 text-left shadow-lg">
+    <h3 className="text-xl font-bold text-white mb-4 text-center">📜 Términos y Condiciones del Sorteo</h3>
+    <ul className="list-disc list-inside space-y-3 text-gray-300 text-sm sm:text-base">
+      <li>El premio consiste en un viaje para dos (2) personas a San Andrés Islas, Colombia, como se describe en la sección del premio.</li>
+      <li>El sorteo se realizará con las dos últimas cifras del premio mayor de la Lotería del Valle en la fecha estipulada una vez se alcance el {saleThreshold}% de la venta.</li>
+      <li>El ganador tendrá un plazo máximo de <strong>seis (6) meses</strong> a partir de la fecha del sorteo para redimir el premio.</li>
+      <li>La reserva del viaje debe coordinarse con el organizador con un mínimo de <strong>30 días de antelación</strong>.</li>
+      <li>El viaje <strong>no es válido para temporada alta</strong> (Semana Santa, receso escolar, del 15 de diciembre al 15 de enero) ni fines de semana con puentes festivos.</li>
+      <li>El premio no es canjeable por dinero en efectivo ni transferible a terceros.</li>
+      <li>Las boletas reservadas y no pagadas en un plazo de <strong>24 horas</strong> serán liberadas y puestas a la venta nuevamente.</li>
+    </ul>
+  </div>
+);
+
 // Un "esqueleto" de carga para una mejor experiencia visual.
 const TicketGridSkeleton = () => (
   <div className="grid grid-cols-5 sm:grid-cols-10 gap-3 sm:gap-4">
@@ -30,11 +46,6 @@ const TicketGridSkeleton = () => (
 );
 
 function App() {
-  // --- Constantes Comerciales (fácil de modificar aquí) ---
-  const TICKET_PRICE = 40000;
-  const SALE_THRESHOLD_PERCENT = 80;
-  const currencyFormatter = new Intl.NumberFormat('es-CO', { style: 'currency', currency: 'COP', minimumFractionDigits: 0 });
-
   const { tickets, loading, error, fetchTickets } = useTickets();
   const [selectedNumbers, setSelectedNumbers] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -128,9 +139,6 @@ function App() {
   // Usamos useMemo para evitar recalcular en cada renderizado
   const reservedCount = useMemo(() => tickets.filter(t => t.status !== 'AVAILABLE').length, [tickets]);
 
-  // Calculamos el costo total de la selección actual
-  const totalCost = useMemo(() => selectedNumbers.length * TICKET_PRICE, [selectedNumbers, TICKET_PRICE]);
-
   // Calculamos el link de WhatsApp para usarlo en el modal de éxito
   const whatsappMessage = `¡Hola! Quiero reservar los tiquetes para el sorteo a San Andrés. Mis números son: *${selectedNumbers.join(', ')}*. Mi nombre es *${formData.name}*. ¡Gracias!`;
   const whatsappUrl = `https://wa.me/${ADMIN_PHONE}?text=${encodeURIComponent(whatsappMessage)}`;
@@ -149,12 +157,8 @@ function App() {
           <h1 className="text-4xl sm:text-6xl font-extrabold text-white mb-2 drop-shadow-lg tracking-tight">
             ¡Rumbo a San Andrés! 🏝️
           </h1>
-          {/* Mensaje comercial con el precio bien visible */}
-          <p className="text-cyan-100 text-lg sm:text-xl font-light drop-shadow-md max-w-2xl mx-auto">
-            Invierte en tu sueño por solo <span className="font-bold text-yellow-300">{currencyFormatter.format(TICKET_PRICE)}</span> por boleta y gana un viaje inolvidable.
-          </p>
-          <p className="text-white text-lg sm:text-xl font-bold drop-shadow-md">
-            ¡Elige tus números de la suerte!
+          <p className="text-cyan-100 text-lg sm:text-xl font-light drop-shadow-md">
+            Participa en nuestro sorteo y gana un viaje de ensueño. ¡Elige tus números de la suerte!
           </p>
         </div>
 
@@ -173,11 +177,6 @@ function App() {
               totalTickets={tickets.length}
               reservedCount={reservedCount}
             />
-            {/* Mensaje de la condición del sorteo, ¡clave para la transparencia! */}
-            <div className="mt-4 mb-6 text-center bg-yellow-100/80 border-l-4 border-yellow-500 text-yellow-900 p-4 rounded-r-lg shadow">
-              <p className="font-bold">🎯 ¡Aviso Importante!</p>
-              <p className="text-sm">El sorteo se jugará con la Lotería del Valle una vez se haya vendido el <strong>{SALE_THRESHOLD_PERCENT}%</strong> del total de las boletas. ¡Tu compra nos acerca a la meta!</p>
-            </div>
             <div className="grid grid-cols-5 sm:grid-cols-10 gap-3 sm:gap-4">
               {tickets.map((ticket) => (
                 <div
@@ -195,13 +194,16 @@ function App() {
           </div>
         )}
 
+        {/* Sección de Términos y Condiciones */}
+        <TermsAndConditions saleThreshold={SALE_THRESHOLD_PERCENT} />
+
         {selectedNumbers.length > 0 && (
           <div className="fixed bottom-6 left-0 right-0 flex justify-center px-4 z-40">
             <button
-              className="bg-gradient-to-r from-orange-500 to-yellow-500 hover:from-orange-600 hover:to-yellow-600 text-white px-8 py-4 rounded-full font-bold text-xl shadow-2xl transition-all transform hover:scale-105 active:scale-95 flex items-center gap-3 ring-4 ring-orange-200/50 animate-fade-in-up"
+              className="bg-gradient-to-r from-orange-500 to-yellow-500 hover:from-orange-600 hover:to-yellow-600 text-white px-8 py-4 rounded-full font-bold text-xl shadow-2xl transition-all transform hover:scale-105 active:scale-95 flex items-center gap-3 ring-4 ring-orange-200/50 animate-pulse"
               onClick={() => setIsModalOpen(true)}
             >
-              🛒 Reservar ({selectedNumbers.length}) | <span className="font-semibold">{currencyFormatter.format(totalCost)}</span>
+              🛒 Reservar ({selectedNumbers.length}) - ¡Quiero ir! 🏖️
             </button>
           </div>
         )}
@@ -221,8 +223,8 @@ function App() {
                 <form onSubmit={handleSubmit} className="p-6 space-y-4">
                   <div className="bg-gray-100 p-4 rounded-lg text-center">
                     <p className="text-sm text-gray-600">Estás a un paso de apartar los números:</p>
-                    <p className="font-bold text-2xl text-blue-800 tracking-wider my-1">{selectedNumbers.join(', ')}</p>
-                    <p className="text-sm text-gray-600">Total a pagar: <span className="font-bold text-lg">{currencyFormatter.format(totalCost)}</span> ({selectedNumbers.length} boletas)</p>
+                    <p className="font-bold text-2xl text-blue-800 tracking-wider my-2">{selectedNumbers.join(', ')}</p>
+                    <p className="text-sm text-gray-600">Total de boletas: {selectedNumbers.length}</p>
                   </div>
                   <div>
                     <label htmlFor="name" className="block text-gray-700 font-bold mb-1">Nombre Completo</label>
@@ -257,7 +259,11 @@ function App() {
                   <div className="bg-gray-100 p-4 rounded-lg">
                     <p className="font-bold text-2xl text-blue-800 tracking-wider">{selectedNumbers.join(', ')}</p>
                   </div>
-                  <p className="text-gray-600 text-sm">Para completar, contacta al organizador por WhatsApp para coordinar el pago.</p>
+                  <p className="text-gray-600 text-sm">Para completar, contacta al organizador por WhatsApp y coordina el pago.</p>
+                  {/* Mensaje de advertencia sobre el tiempo de pago */}
+                  <p className="text-xs text-red-700 font-semibold bg-red-100 p-2 rounded-md border border-red-200">
+                    Importante: Tienes 24 horas para realizar el pago. De lo contrario, los números volverán a estar disponibles.
+                  </p>
                   <a href={whatsappUrl} target="_blank" rel="noopener noreferrer" className="w-full inline-block bg-green-600 hover:bg-green-700 text-white font-bold py-4 rounded-lg shadow-lg transition-transform transform hover:scale-105 text-lg">
                     Contactar por WhatsApp ✅
                   </a>
