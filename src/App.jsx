@@ -23,11 +23,11 @@ const PrizeDetails = () => (
 // --- Componente para Términos y Condiciones ---
 const TermsAndConditions = ({ saleThreshold }) => (
   <div className="mt-12 w-full max-w-5xl bg-gray-800/50 backdrop-blur-sm p-6 rounded-2xl border border-white/20 text-left shadow-lg">
-    <h3 className="text-xl font-bold text-white mb-4 text-center">📜 Términos y Condiciones del Sorteo</h3>
+    <h3 className="text-xl font-bold text-white mb-4 text-center">📜 Términos y Condiciones</h3>
     <ul className="list-disc list-inside space-y-3 text-gray-300 text-sm sm:text-base">
       <li>El premio consiste en un viaje para dos (2) personas a San Andrés Islas, Colombia, como se describe en la sección del premio.</li>
-      <li>El sorteo se realizará con las dos últimas cifras del premio mayor de la Lotería del Valle en la fecha estipulada una vez se alcance el {saleThreshold}% de la venta.</li>
-      <li>El ganador tendrá un plazo máximo de <strong>seis (6) meses</strong> a partir de la fecha del sorteo para redimir el premio.</li>
+      <li>Se realizará con las dos últimas cifras del premio mayor de la Lotería del Valle en la fecha estipulada una vez se alcance el {saleThreshold}% de la venta.</li>
+      <li>El ganador tendrá un plazo máximo de <strong>seis (6) meses</strong> a partir de la fecha para redimir el premio.</li>
       <li>La reserva del viaje debe coordinarse con el organizador con un mínimo de <strong>30 días de antelación</strong>.</li>
       <li>El viaje <strong>no es válido para temporada alta</strong> (Semana Santa, receso escolar, del 15 de diciembre al 15 de enero) ni fines de semana con puentes festivos.</li>
       <li>El premio no es canjeable por dinero en efectivo ni transferible a terceros.</li>
@@ -148,7 +148,7 @@ function App() {
   const totalCost = useMemo(() => selectedNumbers.length * TICKET_PRICE, [selectedNumbers]);
 
   // Calculamos el link de WhatsApp para usarlo en el modal de éxito
-  const whatsappMessage = `¡Hola! Quiero reservar los tiquetes para el sorteo a San Andrés. Mis números son: *${selectedNumbers.join(', ')}*. Mi nombre es *${formData.name}*. ¡Gracias!`;
+  const whatsappMessage = `¡Hola! Quiero reservar los tiquetes para el viaje a San Andrés. Mis números son: *${selectedNumbers.join(', ')}*. Mi nombre es *${formData.name}*. ¡Gracias!`;
   const whatsappUrl = `https://wa.me/${ADMIN_PHONE}?text=${encodeURIComponent(whatsappMessage)}`;
 
   // NOTA: Para el fondo, agrega una imagen de San Andrés a tu carpeta `public`
@@ -189,10 +189,10 @@ function App() {
               totalTickets={tickets.length}
               reservedCount={reservedCount}
             />
-            {/* Mensaje de la condición del sorteo, ¡clave para la transparencia! */}
+            {/* Mensaje de la condición, ¡clave para la transparencia! */}
             <div className="mt-4 mb-6 text-center bg-yellow-100/80 border-l-4 border-yellow-500 text-yellow-900 p-4 rounded-r-lg shadow">
               <p className="font-bold">🎯 ¡Aviso Importante!</p>
-              <p className="text-sm">El sorteo se jugará con la Lotería de Boyacá una vez se haya vendido el <strong>{SALE_THRESHOLD_PERCENT}%</strong> del total de las boletas. ¡Tu compra nos acerca a la meta!</p>
+              <p className="text-sm">Se jugará con la Lotería del Valle una vez se haya vendido el <strong>{SALE_THRESHOLD_PERCENT}%</strong> del total de las boletas. ¡Tu compra nos acerca a la meta!</p>
             </div>
             <div className="grid grid-cols-5 sm:grid-cols-10 gap-3 sm:gap-4">
               {tickets.map((ticket) => (
