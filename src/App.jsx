@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react';
 import axios from 'axios';
 import AvailabilityMeter from './components/AvailabilityMeter';
+import LoadingSpinner from './LoadingSpinner';
 import { useTickets } from '../useTickets.js';
 
 // --- Componentes Internos para Mejorar la Estructura ---
@@ -33,15 +34,6 @@ const TermsAndConditions = ({ saleThreshold }) => (
       <li>El premio no es canjeable por dinero en efectivo ni transferible a terceros.</li>
       <li>Las boletas reservadas y no pagadas en un plazo de <strong>24 horas</strong> serán liberadas y puestas a la venta nuevamente.</li>
     </ul>
-  </div>
-);
-
-// Un "esqueleto" de carga para una mejor experiencia visual.
-const TicketGridSkeleton = () => (
-  <div className="grid grid-cols-5 sm:grid-cols-10 gap-3 sm:gap-4">
-    {Array.from({ length: 100 }).map((_, i) => (
-      <div key={i} className="aspect-square bg-white/20 rounded-lg animate-pulse"></div>
-    ))}
   </div>
 );
 
@@ -181,7 +173,7 @@ function App() {
         {loading && tickets.length === 0 ? (
           <div className="bg-white/80 backdrop-blur-xl p-4 sm:p-8 rounded-3xl shadow-2xl w-full max-w-5xl border border-white/50">
             <AvailabilityMeter totalTickets={100} reservedCount={0} />
-            <TicketGridSkeleton />
+            <LoadingSpinner />
           </div>
         ) : (
           <div className="bg-white/80 backdrop-blur-xl p-4 sm:p-8 rounded-3xl shadow-2xl w-full max-w-5xl border border-white/50">
