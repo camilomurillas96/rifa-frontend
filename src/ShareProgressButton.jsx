@@ -23,9 +23,17 @@ function ShareProgressButton({ targetElementId }) {
 
     try {
       const canvas = await html2canvas(elementToCapture, {
-        // Opciones para mejorar la calidad de la imagen
         useCORS: true, // Necesario si tienes imágenes de otros dominios
         scale: 2,      // Aumenta la resolución de la captura
+
+        // --- MEJORA: Capturar solo el área visible (viewport) ---
+        // Esto evita imágenes alargadas en móvil y crea una captura con el aspect ratio de la pantalla.
+        height: window.innerHeight,
+        width: window.innerWidth,
+        y: window.scrollY,
+        x: window.scrollX,
+        windowHeight: window.innerHeight, // Ayuda a html2canvas a calcular correctamente los estilos
+        windowWidth: window.innerWidth,
       });
 
       canvas.toBlob(async (blob) => {
