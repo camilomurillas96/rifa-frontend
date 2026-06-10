@@ -3,6 +3,7 @@ import axios from 'axios';
 import AvailabilityMeter from './components/AvailabilityMeter';
 import LoadingSpinner from './LoadingSpinner';
 import { useTickets } from '../useTickets.js';
+import ShareProgressButton from './ShareProgressButton';
 import { Analytics } from '@vercel/analytics/react';
 
 // --- Componentes Internos para Mejorar la Estructura ---
@@ -148,7 +149,7 @@ function App() {
   // y luego en tu archivo `index.css` (o similar) agrega:
   // .bg-san-andres-bg { background-image: url('/nombre-de-tu-imagen.jpg'); }
   return (
-    <div className="min-h-screen p-4 pb-32 sm:p-8 flex flex-col items-center relative bg-blue-900 bg-san-andres-bg bg-cover bg-center bg-no-repeat">
+    <div id="raffle-section" className="min-h-screen p-4 pb-32 sm:p-8 flex flex-col items-center relative bg-blue-900 bg-san-andres-bg bg-cover bg-center bg-no-repeat"> {/* 2. AÑADIR ID */}
       {/* Capa semitransparente para mejorar la legibilidad del texto sobre la imagen */}
       <div className="absolute inset-0 bg-black/40 z-0"></div>
 
@@ -294,6 +295,9 @@ function App() {
             </div>
           </div>
         )}
+
+        {/* 3. AÑADIR EL COMPONENTE DEL BOTÓN AQUÍ */}
+        <ShareProgressButton targetElementId="raffle-section" />
       </div>
     </div>
   );
