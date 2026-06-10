@@ -299,6 +299,7 @@ function App() {
         {/* 3. AÑADIR EL COMPONENTE DEL BOTÓN AQUÍ */}
         <ShareProgressButton targetElementId="raffle-section" />
       </div>
+      <Analytics />
     </div>
   );
 }
