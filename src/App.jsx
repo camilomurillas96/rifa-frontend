@@ -3,6 +3,7 @@ import axios from 'axios';
 import AvailabilityMeter from './components/AvailabilityMeter';
 import LoadingSpinner from './LoadingSpinner';
 import { useTickets } from '../useTickets.js';
+import { Analytics } from '@vercel/analytics/react';
 
 // --- Componentes Internos para Mejorar la Estructura ---
 
