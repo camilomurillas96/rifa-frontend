@@ -31,18 +31,18 @@ function ShareProgressButton({ targetElementId }) {
         useCORS: true, // Necesario si tienes imágenes de otros dominios
         scale: 2,      // Aumenta la resolución de la captura
 
-        // --- CORRECCIÓN: Opciones para capturar el contenido completo con scroll ---
-        // Usamos scrollHeight y scrollWidth para que el canvas tenga el tamaño total del contenido.
-        width: elementToCapture.scrollWidth,
-        height: elementToCapture.scrollHeight,
-
-        // Es buena práctica definir el contexto de la ventana para el renderizado.
-        windowWidth: elementToCapture.scrollWidth,
-        windowHeight: elementToCapture.scrollHeight,
-        
-        // Aseguramos que la "cámara" virtual esté en la posición correcta (arriba del todo).
-        scrollX: 0,
-        scrollY: 0,
+        // --- MEJORA: Capturar el área visible para evitar imágenes alargadas ---
+        // Esto crea una imagen con las dimensiones de la pantalla del dispositivo,
+        // lo que es ideal para compartir en redes sociales.
+        // Como hemos hecho scroll al inicio, siempre se captura la parte superior.
+        height: window.innerHeight,
+        width: window.innerWidth,
+        // Indicamos a html2canvas la posición del scroll (que ahora es 0,0)
+        // y el tamaño de la ventana para que calcule los estilos correctamente.
+        scrollX: -window.scrollX, // Será 0
+        scrollY: -window.scrollY, // Será 0
+        windowHeight: window.innerHeight,
+        windowWidth: window.innerWidth,
       });
 
       canvas.toBlob(async (blob) => {
