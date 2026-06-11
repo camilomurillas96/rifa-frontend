@@ -21,19 +21,28 @@ function ShareProgressButton({ targetElementId }) {
 
     setIsLoading(true);
 
+    // Guardamos la posición actual del scroll para restaurarla después.
+    const originalScrollY = window.scrollY;
+    // Hacemos scroll al inicio para asegurar una captura completa y consistente.
+    window.scrollTo(0, 0);
+
     try {
       const canvas = await html2canvas(elementToCapture, {
         useCORS: true, // Necesario si tienes imágenes de otros dominios
         scale: 2,      // Aumenta la resolución de la captura
 
-        // --- MEJORA: Capturar solo el área visible (viewport) ---
-        // Esto evita imágenes alargadas en móvil y crea una captura con el aspect ratio de la pantalla.
-        height: window.innerHeight,
-        width: window.innerWidth,
-        y: window.scrollY,
-        x: window.scrollX,
-        windowHeight: window.innerHeight, // Ayuda a html2canvas a calcular correctamente los estilos
-        windowWidth: window.innerWidth,
+        // --- CORRECCIÓN: Opciones para capturar el contenido completo con scroll ---
+        // Usamos scrollHeight y scrollWidth para que el canvas tenga el tamaño total del contenido.
+        width: elementToCapture.scrollWidth,
+        height: elementToCapture.scrollHeight,
+
+        // Es buena práctica definir el contexto de la ventana para el renderizado.
+        windowWidth: elementToCapture.scrollWidth,
+        windowHeight: elementToCapture.scrollHeight,
+        
+        // Aseguramos que la "cámara" virtual esté en la posición correcta (arriba del todo).
+        scrollX: 0,
+        scrollY: 0,
       });
 
       canvas.toBlob(async (blob) => {
@@ -75,6 +84,8 @@ function ShareProgressButton({ targetElementId }) {
       console.error('Error al generar la imagen:', error);
       alert('Hubo un problema al generar la imagen. Por favor, inténtalo de nuevo.');
     } finally {
+      // ¡Muy importante! Restauramos la posición original del scroll para no afectar al usuario.
+      window.scrollTo(0, originalScrollY);
       setIsLoading(false);
     }
   };
