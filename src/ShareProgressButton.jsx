@@ -30,10 +30,6 @@ function ShareProgressButton({ targetElementId }) {
       const canvas = await html2canvas(elementToCapture, {
         useCORS: true, // Necesario si tienes imágenes de otros dominios
         scale: 2,      // Aumenta la resolución de la captura
-        // SOLUCIÓN: Añadir un color de fondo sólido.
-        // Esto evita problemas de renderizado con fondos transparentes o imágenes de fondo complejas,
-        // asegurando que las dimensiones de la captura sean correctas.
-        backgroundColor: '#0c4a6e', // Un azul oscuro que combina con el tema (Tailwind sky-800)
 
         // --- CORRECCIÓN: Opciones para capturar el contenido completo con scroll ---
         // Usamos scrollHeight y scrollWidth para que el canvas tenga el tamaño total del contenido.
@@ -73,18 +69,14 @@ function ShareProgressButton({ targetElementId }) {
             }
           }
         } else {
-          // Fallback para navegadores de escritorio o entornos no seguros (http)
-          if (window.location.protocol !== 'https:') {
-            alert('La función de compartir solo está disponible en sitios seguros (HTTPS). La imagen se descargará en su lugar.');
-          } else {
-            alert('Tu navegador no soporta la función de compartir archivos. La imagen se descargará.');
-          }
+          // Fallback: descargar la imagen en escritorio
           const link = document.createElement('a');
           link.href = URL.createObjectURL(blob);
           link.download = 'progreso-rifa.png';
           document.body.appendChild(link);
           link.click();
           document.body.removeChild(link);
+          URL.revokeObjectURL(link.href);
         }
       }, 'image/png');
 
@@ -103,12 +95,19 @@ function ShareProgressButton({ targetElementId }) {
       onClick={handleShare}
       disabled={isLoading}
       title="Compartir progreso"
-      className="flex items-center justify-center p-4 text-3xl transition-transform duration-200 transform bg-white/20 backdrop-blur-sm rounded-full hover:scale-110 focus:outline-none focus:ring-2 focus:ring-cyan-300 disabled:opacity-50 disabled:cursor-not-allowed"
+      // Estilo modificado para ser más pequeño y discreto, con texto.
+      className="flex items-center justify-center gap-2 px-4 py-2 mt-8 text-white transition-colors duration-200 bg-black/20 backdrop-blur-sm rounded-full hover:bg-black/40 focus:outline-none focus:ring-2 focus:ring-cyan-300 disabled:opacity-50 disabled:cursor-not-allowed"
     >
       {isLoading ? (
-        <span className="animate-spin text-2xl">⏳</span>
+        <>
+          <span className="animate-spin text-lg">⏳</span>
+          <span className="text-sm font-medium">Generando...</span>
+        </>
       ) : (
-        <span>📸</span>
+        <>
+          <span className="text-lg">📸</span>
+          <span className="text-sm font-medium">Compartir con amigos</span>
+        </>
       )}
     </button>
   );
