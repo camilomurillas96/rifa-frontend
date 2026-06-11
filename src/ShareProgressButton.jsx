@@ -31,15 +31,16 @@ function ShareProgressButton({ targetElementId }) {
         useCORS: true, // Necesario si tienes imágenes de otros dominios
         scale: 2,      // Aumenta la resolución de la captura
 
-        // --- SOLUCIÓN DEFINITIVA: Capturar el contenido completo del área designada ---
-        // Ahora que tenemos un `targetElementId` que apunta a un área específica,
-        // podemos capturar su altura y anchura completas sin miedo a que la imagen
-        // sea demasiado larga (porque no incluye los T&C) o demasiado corta.
+        // --- CORRECCIÓN: Opciones para capturar el contenido completo con scroll ---
+        // Usamos scrollHeight y scrollWidth para que el canvas tenga el tamaño total del contenido.
         width: elementToCapture.scrollWidth,
         height: elementToCapture.scrollHeight,
+
+        // Es buena práctica definir el contexto de la ventana para el renderizado.
         windowWidth: elementToCapture.scrollWidth,
         windowHeight: elementToCapture.scrollHeight,
-        // El scroll al inicio (0,0) asegura que la captura sea consistente.
+        
+        // Aseguramos que la "cámara" virtual esté en la posición correcta (arriba del todo).
         scrollX: 0,
         scrollY: 0,
       });
@@ -99,7 +100,7 @@ function ShareProgressButton({ targetElementId }) {
       {isLoading ? (
         <span className="animate-spin text-2xl">⏳</span>
       ) : (
-        <span>📸 Compartir progreso</span>
+        <span>📸</span>
       )}
     </button>
   );
