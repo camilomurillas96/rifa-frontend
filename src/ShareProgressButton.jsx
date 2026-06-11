@@ -30,6 +30,10 @@ function ShareProgressButton({ targetElementId }) {
       const canvas = await html2canvas(elementToCapture, {
         useCORS: true, // Necesario si tienes imágenes de otros dominios
         scale: 2,      // Aumenta la resolución de la captura
+        // SOLUCIÓN: Añadir un color de fondo sólido.
+        // Esto evita problemas de renderizado con fondos transparentes o imágenes de fondo complejas,
+        // asegurando que las dimensiones de la captura sean correctas.
+        backgroundColor: '#0c4a6e', // Un azul oscuro que combina con el tema (Tailwind sky-800)
 
         // --- CORRECCIÓN: Opciones para capturar el contenido completo con scroll ---
         // Usamos scrollHeight y scrollWidth para que el canvas tenga el tamaño total del contenido.
@@ -69,14 +73,18 @@ function ShareProgressButton({ targetElementId }) {
             }
           }
         } else {
-          // Fallback: descargar la imagen en escritorio
+          // Fallback para navegadores de escritorio o entornos no seguros (http)
+          if (window.location.protocol !== 'https:') {
+            alert('La función de compartir solo está disponible en sitios seguros (HTTPS). La imagen se descargará en su lugar.');
+          } else {
+            alert('Tu navegador no soporta la función de compartir archivos. La imagen se descargará.');
+          }
           const link = document.createElement('a');
           link.href = URL.createObjectURL(blob);
           link.download = 'progreso-rifa.png';
           document.body.appendChild(link);
           link.click();
           document.body.removeChild(link);
-          URL.revokeObjectURL(link.href);
         }
       }, 'image/png');
 
