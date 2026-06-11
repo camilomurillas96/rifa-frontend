@@ -31,18 +31,17 @@ function ShareProgressButton({ targetElementId }) {
         useCORS: true, // Necesario si tienes imágenes de otros dominios
         scale: 2,      // Aumenta la resolución de la captura
 
-        // --- MEJORA: Capturar el área visible para evitar imágenes alargadas ---
-        // Esto crea una imagen con las dimensiones de la pantalla del dispositivo,
-        // lo que es ideal para compartir en redes sociales.
-        // Como hemos hecho scroll al inicio, siempre se captura la parte superior.
-        height: window.innerHeight,
-        width: window.innerWidth,
-        // Indicamos a html2canvas la posición del scroll (que ahora es 0,0)
-        // y el tamaño de la ventana para que calcule los estilos correctamente.
-        scrollX: -window.scrollX, // Será 0
-        scrollY: -window.scrollY, // Será 0
-        windowHeight: window.innerHeight,
-        windowWidth: window.innerWidth,
+        // --- SOLUCIÓN DEFINITIVA: Capturar el contenido completo del área designada ---
+        // Ahora que tenemos un `targetElementId` que apunta a un área específica,
+        // podemos capturar su altura y anchura completas sin miedo a que la imagen
+        // sea demasiado larga (porque no incluye los T&C) o demasiado corta.
+        width: elementToCapture.scrollWidth,
+        height: elementToCapture.scrollHeight,
+        windowWidth: elementToCapture.scrollWidth,
+        windowHeight: elementToCapture.scrollHeight,
+        // El scroll al inicio (0,0) asegura que la captura sea consistente.
+        scrollX: 0,
+        scrollY: 0,
       });
 
       canvas.toBlob(async (blob) => {
@@ -100,7 +99,7 @@ function ShareProgressButton({ targetElementId }) {
       {isLoading ? (
         <span className="animate-spin text-2xl">⏳</span>
       ) : (
-        <span>📸</span>
+        <span>📸 Compartir progreso</span>
       )}
     </button>
   );
